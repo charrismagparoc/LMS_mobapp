@@ -7,7 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { loginApi, API_BASE_URL } from '../api/client';
+import { loginApi } from '../api/client';
 
 export default function LoginScreen({ navigation }: any) {
   const { login } = useAuth();
@@ -35,27 +35,7 @@ export default function LoginScreen({ navigation }: any) {
       const res = await loginApi(email.trim().toLowerCase(), password);
       await login(res.data.user, res.data.access, res.data.refresh);
     } catch (err: any) {
-      console.log('=== LOGIN ERROR ===');
-      console.log('API URL:', API_BASE_URL);
-      console.log('Error message:', err.message);
-      console.log('Error code:', err.code);
-      console.log('Response status:', err.response?.status);
-      console.log('Response data:', JSON.stringify(err.response?.data));
-      console.log('==================');
-
-      let msg = 'Login failed.';
-      if (!err.response) {
-        // No response = network error, can't reach server
-        msg = `Network Error: Cannot reach server.\nAPI URL: ${API_BASE_URL}\nMake sure Django is running with 0.0.0.0:8000`;
-      } else if (err.response.status === 401) {
-        msg = 'Invalid email or password.';
-      } else if (err.response.status === 400) {
-        msg = err.response.data?.error || err.response.data?.detail || 'Bad request.';
-      } else if (err.response.status === 403) {
-        msg = 'Account not activated. Please verify your email first.';
-      } else {
-        msg = err.response?.data?.error || err.response?.data?.detail || err.message || 'Login failed.';
-      }
+      const msg = err.response?.data?.error || err.response?.data?.detail || 'Login failed.';
       Alert.alert('Login Failed', msg);
     } finally { setLoading(false); }
   };
@@ -78,7 +58,6 @@ export default function LoginScreen({ navigation }: any) {
         <View style={s.card}>
           <Text style={s.title}>Welcome Back</Text>
           <Text style={s.sub}>Sign in to continue</Text>
-
 
           <Text style={s.label}>Email Address</Text>
           <View style={s.inputWrap}>
