@@ -10,11 +10,12 @@ import { Ionicons } from '@expo/vector-icons'
 
 import LoginScreen from './src/screens/LoginScreen'
 import RegisterScreen from './src/screens/RegisterScreen'
+import VerifyPinScreen from './src/screens/VerifyPinScreen'
 import DashboardScreen from './src/screens/DashboardScreen'
 import BooksScreen from './src/screens/BooksScreen'
 import MyBorrowsScreen from './src/screens/MyBorrowsScreen'
-import ChatbotScreen from './src/screens/ChatbotScreen'
 import ProfileScreen from './src/screens/ProfileScreen'
+import FloatingChatbot from './src/components/FloatingChatbot'
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -22,7 +23,8 @@ const Tab = createBottomTabNavigator()
 function MainTabs() {
   const { theme } = useTheme()
   return (
-    <Tab.Navigator
+    <View style={{ flex: 1 }}>
+      <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
@@ -41,7 +43,6 @@ function MainTabs() {
             Home: focused ? 'home' : 'home-outline',
             Books: focused ? 'book' : 'book-outline',
             MyBorrows: focused ? 'list' : 'list-outline',
-            Chatbot: focused ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline',
             Profile: focused ? 'person-circle' : 'person-circle-outline',
           }
           return <Ionicons name={icons[route.name]} size={size} color={color} />
@@ -51,9 +52,10 @@ function MainTabs() {
       <Tab.Screen name="Home" component={DashboardScreen} options={{ tabBarLabel: 'Home' }} />
       <Tab.Screen name="Books" component={BooksScreen} options={{ tabBarLabel: 'Books' }} />
       <Tab.Screen name="MyBorrows" component={MyBorrowsScreen} options={{ tabBarLabel: 'Borrows' }} />
-      <Tab.Screen name="Chatbot" component={ChatbotScreen} options={{ tabBarLabel: 'Libra AI' }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'Profile' }} />
     </Tab.Navigator>
+      <FloatingChatbot />
+    </View>
   )
 }
 
@@ -87,6 +89,7 @@ function AppNavigator() {
           <>
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Create Account' }} />
+            <Stack.Screen name="VerifyPin" component={VerifyPinScreen} options={{ title: 'Verify Email', headerBackVisible: false }} />
           </>
         )}
       </Stack.Navigator>

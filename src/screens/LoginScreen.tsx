@@ -35,8 +35,24 @@ export default function LoginScreen({ navigation }: any) {
       const res = await loginApi(email.trim().toLowerCase(), password);
       await login(res.data.user, res.data.access, res.data.refresh);
     } catch (err: any) {
-      const msg = err.response?.data?.error || err.response?.data?.detail || 'Login failed.';
-      Alert.alert('Login Failed', msg);
+      if (!err.response) {
+        Alert.alert('Connection Error', 'Cannot reach the server. Make sure:\n• Django backend is running on port 8000\n• Your phone and PC are on the same Wi-Fi');
+        return;
+      }
+      const data = err.response?.data;
+      if (data?.not_activated) {
+        Alert.alert(
+          'Account Not Activated',
+          'Your account email has not been verified yet. Would you like to verify it now?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Verify Now', onPress: () => navigation.navigate('VerifyPin', { email: data.email || email.trim().toLowerCase() }) },
+          ]
+        );
+      } else {
+        const msg = data?.error || data?.detail || JSON.stringify(data) || 'Login failed.';
+        Alert.alert('Login Failed', msg);
+      }
     } finally { setLoading(false); }
   };
 
@@ -105,8 +121,8 @@ export default function LoginScreen({ navigation }: any) {
         </View>
 
         <View style={s.note}>
-          <Ionicons name="mail-outline" size={13} color={theme.indigoLight} />
-          <Text style={s.noteText}> New accounts require email verification before login</Text>
+          <Ionicons name="information-circle-outline" size={13} color={theme.indigoLight} />
+          <Text style={s.noteText}> New accounts may need staff approval before borrowing is enabled</Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
