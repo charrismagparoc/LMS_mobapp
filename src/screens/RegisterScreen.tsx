@@ -34,15 +34,27 @@ export default function RegisterScreen({ navigation }: any) {
     if (!validate()) return;
     setLoading(true);
     try {
-      await registerApi({ first_name: form.first_name.trim(), last_name: form.last_name.trim(), email: form.email.trim().toLowerCase(), phone: form.phone.trim(), password: form.password });
-      Alert.alert('Success!', 'Account created! Check your email for an activation link.', [{ text: 'Go to Login', onPress: () => navigation.navigate('Login') }]);
+      const res = await registerApi({ first_name: form.first_name.trim(), last_name: form.last_name.trim(), email: form.email.trim().toLowerCase(), phone: form.phone.trim(), password: form.password });
+      // Navigate to PIN verification screen
+      navigation.navigate('VerifyPin', { email: form.email.trim().toLowerCase() });
     } catch (err: any) {
+      if (!err.response) {
+        Alert.alert('Connection Error', 'Cannot reach the server. Make sure:\n• Django backend is running\n• Your phone and PC are on the same Wi-Fi\n• The API URL is correct');
+        return;
+      }
       const data = err.response?.data;
       if (data && typeof data === 'object') {
         const e: any = {};
-        Object.keys(data).forEach(k => { e[k] = Array.isArray(data[k]) ? data[k][0] : data[k]; });
+        Object.keys(data).forEach(k => {
+          e[k] = Array.isArray(data[k]) ? data[k][0] : String(data[k]);
+        });
         setErrors(e);
-      } else Alert.alert('Error', 'Registration failed.');
+        // Show a top-level alert for the most important error
+        const firstErr = Object.values(e)[0] as string;
+        if (firstErr) Alert.alert('Registration Error', firstErr);
+      } else {
+        Alert.alert('Error', typeof data === 'string' ? data : 'Registration failed. Please try again.');
+      }
     } finally { setLoading(false); }
   };
 
@@ -121,7 +133,7 @@ export default function RegisterScreen({ navigation }: any) {
 
         <View style={s.note}>
           <Ionicons name="mail-outline" size={13} color={theme.indigoLight} />
-          <Text style={s.noteText}> You'll receive an email activation link after registering</Text>
+          <Text style={s.noteText}> You'll receive a 6-digit PIN by email to activate your account</Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
